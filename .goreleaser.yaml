@@ -1,0 +1,53 @@
+project_name: ${SERVICE_NAME}
+dist: dist/${SERVICE_NAME}
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+builds:
+  - main: ./cmd/${SERVICE_NAME}
+    flags: -a -tags netgo
+    ldflags:
+      - -s -w
+      - -X main.Version={{ trimprefix .Version "${SERVICE_NAME}/v"}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 7
+checksum:
+  name_template: 'checksums.txt'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^cut:'
+      - '^typo'
+dockers:
+  - image_templates:
+      - ghcr.io/kobtea/sample-${SERVICE_NAME}:latest
+      - ghcr.io/kobtea/sample-${SERVICE_NAME}:v{{.Version}}
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/amd64
+  - image_templates:
+      - ghcr.io/kobtea/sample-${SERVICE_NAME}:latest
+      - ghcr.io/kobtea/sample-${SERVICE_NAME}:v{{.Version}}
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm64

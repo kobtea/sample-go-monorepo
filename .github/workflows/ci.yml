@@ -10,6 +10,19 @@ env:
   CGO_ENABLED: 0
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ^1.20
+      - name: Golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.52.0
+          args: -E gofmt,goimports --timeout 5m0s
+
   targets:
     runs-on: ubuntu-latest
     outputs:
@@ -19,11 +32,10 @@ jobs:
         with:
           fetch-depth: 0
       - id: services
-        run: |
-          ls -1 cmd | tr '\n' ',' | sed 's/,$//'
-          echo "services=$(ls -1 cmd | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
+        name: Get services
+        run: echo "services=$(ls -1 cmd | tr '\n' ',' | sed 's/,$//' | jq -csR 'split(",")')" >> $GITHUB_OUTPUT
 
-  debug:
+  build:
     runs-on: ubuntu-latest
     needs: targets
     strategy:
@@ -33,5 +45,32 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - run: echo ${{ matrix.target }}
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ^1.20
+      - name: Generate .goreleaser.yaml
+        run: |
+          SERVICE_NAME=${{ matrix.target }} envsubst < .goreleaser.yaml > .goreleaser.${{ matrix.target }}.yaml
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v4
+        with:
+          version: latest
+          args: build --snapshot -f .goreleaser.${{ matrix.target }}.yaml
 
+  tagging:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - build
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.targets.outputs.services) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PERSONAL_TOKEN }}
+      - uses: kobtea/release-tag-action@v0
+        with:
+          prefix: ${{ matrix.target }}/v
+          version_file: ./cmd/${{ matrix.target }}/VERSION
