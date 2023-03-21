@@ -19,7 +19,9 @@ jobs:
         with:
           fetch-depth: 0
       - id: services
-        run: echo "services=$(ls -1 cmd | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
+        run: |
+          ls -1 cmd | tr '\n' ',' | sed 's/,$//'
+          echo "services=$(ls -1 cmd | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
 
   debug:
     runs-on: ubuntu-latest
