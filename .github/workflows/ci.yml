@@ -22,6 +22,12 @@ jobs:
         name: Get services
         run: echo "services=$(ls -1 cmd | tr '\n' ',' | sed 's/,$//' | jq -csR 'split(\',\')')" >> $GITHUB_OUTPUT
 
+  debugprint:
+    runs-on: ubuntu-latest
+    needs: targets
+    steps:
+      - run: echo ${{ fromJson(needs.targets.outputs.services) }}
+
   debug:
     runs-on: ubuntu-latest
     needs: targets
