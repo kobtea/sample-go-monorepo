@@ -57,4 +57,4 @@ jobs:
         uses: goreleaser/goreleaser-action@v4
         with:
           version: latest
-          args: build --snapshot
+          args: build --snapshot -f .goreleaser.${{ matrix.target }}.yaml
