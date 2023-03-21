@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
       - id: services
         name: Get services
-        run: echo "services=$(ls -1 cmd | tr '\n' ',' | sed 's/,$//' | jq -csR 'split(\',\')')" >> $GITHUB_OUTPUT
+        run: echo "services=$(ls -1 cmd | tr '\n' ',' | sed 's/,$//' | jq -csR 'split(",")')" >> $GITHUB_OUTPUT
 
   debugprint:
     runs-on: ubuntu-latest
