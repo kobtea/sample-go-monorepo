@@ -9,7 +9,7 @@ builds:
     flags: -a -tags netgo
     ldflags:
       - -s -w
-      - -X main.Version={{ trimprefix .Env.Version "${SERVICE_NAME}/v"}}
+      - -X main.Version={{ trimprefix .Version "${SERVICE_NAME}/v"}}
     env:
       - CGO_ENABLED=0
     goos:
