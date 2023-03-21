@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       service: ${{ steps.service.outputs.service }}
+      version: ${{ steps.service.outputs.version }}
     steps:
       - id: service
         name: Get service
         run: |
           echo "service=$(echo ${GITHUB_REF#refs/tags/} | cut -d'/' -f1)" >> $GITHUB_OUTPUT
+          echo "version=$(echo ${GITHUB_REF#refs/tags/} | cut -d'/' -f2)" >> $GITHUB_OUTPUT
 
   release:
     runs-on: ubuntu-latest
@@ -42,3 +44,4 @@ jobs:
           args: release --clean -f .goreleaser.${{ needs.target.outputs.service }}.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.target.outputs.version }}

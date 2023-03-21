@@ -9,7 +9,7 @@ builds:
     flags: -a -tags netgo
     ldflags:
       - -s -w
-      - -X main.Version={{trimprefix .Version "${SERVICE_NAME}/v"}}
+      - -X main.Version={{.Env.VERSION}}
     env:
       - CGO_ENABLED=0
     goos:
@@ -41,13 +41,13 @@ changelog:
 dockers:
   - image_templates:
       - ghcr.io/kobtea/sample-${SERVICE_NAME}:latest
-      - ghcr.io/kobtea/sample-${SERVICE_NAME}:v{{trimprefix .Version "${SERVICE_NAME}/v"}}
+      - ghcr.io/kobtea/sample-${SERVICE_NAME}:{{.Env.VERSION}}
     use: buildx
     build_flag_templates:
       - --platform=linux/amd64
   - image_templates:
       - ghcr.io/kobtea/sample-${SERVICE_NAME}:latest
-      - ghcr.io/kobtea/sample-${SERVICE_NAME}:v{{trimprefix .Version "${SERVICE_NAME}/v"}}
+      - ghcr.io/kobtea/sample-${SERVICE_NAME}:{{.Env.VERSION}}
     use: buildx
     build_flag_templates:
       - --platform=linux/arm64
