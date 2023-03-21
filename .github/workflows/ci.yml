@@ -56,3 +56,21 @@ jobs:
         with:
           version: latest
           args: build --snapshot -f .goreleaser.${{ matrix.target }}.yaml
+
+  tagging:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - build
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.targets.outputs.services) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PERSONAL_TOKEN }}
+      - uses: kobtea/release-tag-action@v0
+        with:
+          prefix: ${{ matrix.target }}/v
+          version_file: ./cmd/${{ matrix.target }}/VERSION
